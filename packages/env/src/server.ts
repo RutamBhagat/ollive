@@ -11,6 +11,7 @@ export const env = createEnv({
       .default("development"),
     OLLAMA_HOST: z.url().optional().default("http://localhost:11434"),
     OPENAI_API_KEY: z.string().min(1).optional(),
+    OPENAI_PROXY_URL: z.url().optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
