@@ -26,6 +26,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@langchain/langgraph-cli": "^2.0.0",
     "@ollive/config": "workspace:*",
     "@types/node": "catalog:",
     "turbo": "^2.8.12",
