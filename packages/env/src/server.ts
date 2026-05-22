@@ -9,7 +9,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
-    OLLAMA_HOST: z.url().optional().default("http://localhost:11434"),
+    OLLAMA_PROXY_URL: z.url().optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     OPENAI_PROXY_URL: z.url().optional(),
   },

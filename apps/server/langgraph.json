@@ -1,9 +1,12 @@
 {
   "node_version": "22",
   "dockerfile_lines": [],
-  "dependencies": ["."],
+  "dependencies": [
+    "."
+  ],
   "graphs": {
-    "agent": "./src/agent.ts:agent"
+    "openAIAgent": "./src/agent.ts:openAIAgent",
+    "ollamaAgent": "./src/agent.ts:ollamaAgent"
   },
   "env": ".env"
 }
