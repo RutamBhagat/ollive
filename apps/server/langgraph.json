@@ -5,8 +5,8 @@
     "."
   ],
   "graphs": {
-    "openAIAgent": "./src/agent.ts:openAIAgent",
-    "ollamaAgent": "./src/agent.ts:ollamaAgent"
+    "agent": "./src/agent.ts:agent",
+    "openSourceAgent": "./src/agent.ts:openSourceAgent"
   },
   "env": ".env"
 }
