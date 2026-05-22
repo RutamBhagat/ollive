@@ -1,0 +1,3 @@
+{
+  "extends": "@ollive/config/tsconfig.base.json"
+}
