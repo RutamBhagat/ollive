@@ -4,13 +4,13 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    CORS_ORIGIN: z.url(),
-    GOOGLE_API_KEY: z.string().min(1),
+    CORS_ORIGIN: z.url().optional(),
+    GOOGLE_API_KEY: z.string().min(1).optional(),
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
     OLLAMA_HOST: z.url().optional().default("http://localhost:11434"),
-    OPENAI_API_KEY: z.string().min(1),
+    OPENAI_API_KEY: z.string().min(1).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

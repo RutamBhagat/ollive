@@ -5,12 +5,12 @@ import { TOOLS } from "./tools.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 
 const MODELS = [
-  "ollama:gemma4:26b",
+  // "ollama:gemma4:26b",
   "ollama:qwen3.5:9b",
-  "google-genai:gemini-3.1-flash-lite",
-  "google-genai:gemini-2.5-flash-lite",
-  "openai:gpt-5.4-mini",
-  "openai:gpt-5.5",
+  // "google-genai:gemini-3.1-flash-lite",
+  // "google-genai:gemini-2.5-flash-lite",
+  // "openai:gpt-5.4-mini",
+  // "openai:gpt-5.5",
 ] as const;
 
 const contextSchema = z.object({
