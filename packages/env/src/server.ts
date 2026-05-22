@@ -5,7 +5,9 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     CORS_ORIGIN: z.url(),
+    GOOGLE_API_KEY: z.string().min(1),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+    OPENAI_API_KEY: z.string().min(1),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
