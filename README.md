@@ -45,3 +45,25 @@ Then open LangGraph Studio and select:
 
 - `agent`
 - `openSourceAgent`
+
+## LangSmith eval setup (happy path)
+
+Set these in `apps/server/.env`:
+
+```bash
+LANGSMITH_API_KEY=your-langsmith-api-key
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=ollive
+```
+
+Upsert the three datasets:
+
+```bash
+npm run langsmith:datasets:upsert
+```
+
+Run experiments for both assistants (`agent` and `openSourceAgent`) on all three datasets:
+
+```bash
+npm run langsmith:eval:run
+```

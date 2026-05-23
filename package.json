@@ -19,7 +19,8 @@
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:server": "turbo -F server dev",
-    "langsmith:datasets:upsert": "bun apps/server/src/eval/datasets/upsert-langsmith-datasets.ts"
+    "langsmith:datasets:upsert": "bun --cwd apps/server src/eval/datasets/upsert-langsmith-datasets.ts",
+    "langsmith:eval:run": "bun --cwd apps/server src/eval/run-langsmith-experiments.ts"
   },
   "dependencies": {
     "@ollive/env": "workspace:*",
