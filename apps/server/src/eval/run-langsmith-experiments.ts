@@ -14,9 +14,7 @@ const judge = new ChatOpenAI({
     : {}),
 });
 
-function createJudgeEvaluator(
-  promptTemplate: string,
-) {
+function createJudgeEvaluator(promptTemplate: string) {
   return async (run: Run, example?: Example): Promise<EvaluationResult[]> => {
     const prompt = promptTemplate
       .replaceAll("{{inputs}}", JSON.stringify(run.inputs ?? {}))
@@ -64,46 +62,35 @@ const runOpenSource = async (exampleInput: {
   };
 };
 
-await evaluate(runFrontier, {
-  data: "ollive_bias_and_fairness",
-  evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
-  experimentPrefix: "ollive_bias_and_fairness frontier experiment",
-});
-
-await evaluate(runOpenSource, {
-  data: "ollive_bias_and_fairness",
-  evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
-  experimentPrefix: "ollive_bias_and_fairness open_source experiment",
-});
-
-await evaluate(runFrontier, {
-  data: "ollive_content_safety_jailbreak",
-  evaluators: [
-    createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
-  ],
-  experimentPrefix: "ollive_content_safety_jailbreak frontier experiment",
-});
-
-await evaluate(runOpenSource, {
-  data: "ollive_content_safety_jailbreak",
-  evaluators: [
-    createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
-  ],
-  experimentPrefix: "ollive_content_safety_jailbreak open_source experiment",
-});
-
-await evaluate(runFrontier, {
-  data: "ollive_factual_hallucination",
-  evaluators: [
-    createJudgeEvaluator(EVAL_PROMPTS.hallucination),
-  ],
-  experimentPrefix: "ollive_factual_hallucination frontier experiment",
-});
-
-await evaluate(runOpenSource, {
-  data: "ollive_factual_hallucination",
-  evaluators: [
-    createJudgeEvaluator(EVAL_PROMPTS.hallucination),
-  ],
-  experimentPrefix: "ollive_factual_hallucination open_source experiment",
-});
+await Promise.all([
+  evaluate(runFrontier, {
+    data: "ollive_bias_and_fairness",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
+    experimentPrefix: "ollive_bias_and_fairness frontier experiment",
+  }),
+  evaluate(runOpenSource, {
+    data: "ollive_bias_and_fairness",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
+    experimentPrefix: "ollive_bias_and_fairness open_source experiment",
+  }),
+  evaluate(runFrontier, {
+    data: "ollive_content_safety_jailbreak",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.promptInjection)],
+    experimentPrefix: "ollive_content_safety_jailbreak frontier experiment",
+  }),
+  evaluate(runOpenSource, {
+    data: "ollive_content_safety_jailbreak",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.promptInjection)],
+    experimentPrefix: "ollive_content_safety_jailbreak open_source experiment",
+  }),
+  evaluate(runFrontier, {
+    data: "ollive_factual_hallucination",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.hallucination)],
+    experimentPrefix: "ollive_factual_hallucination frontier experiment",
+  }),
+  evaluate(runOpenSource, {
+    data: "ollive_factual_hallucination",
+    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.hallucination)],
+    experimentPrefix: "ollive_factual_hallucination open_source experiment",
+  }),
+]);
