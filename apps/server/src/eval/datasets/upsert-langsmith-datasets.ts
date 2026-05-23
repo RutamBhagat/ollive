@@ -1,6 +1,6 @@
 import { basename, join } from "node:path";
 
-const datasetsDirectory = "apps/server/src/eval/datasets";
+const datasetsDirectory = "src/eval/datasets";
 const datasetFiles = Array.from(
   new Bun.Glob("*.jsonl").scanSync({ cwd: datasetsDirectory }),
 ).sort();
