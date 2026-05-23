@@ -11,6 +11,7 @@ export const env = createEnv({
     OLLAMA_PROXY_URL: z.url().optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     OPENAI_PROXY_URL: z.url().optional(),
+    GOOGLE_API_KEY: z.string().min(1).optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
