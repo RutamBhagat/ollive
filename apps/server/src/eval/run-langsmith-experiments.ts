@@ -1,53 +1,109 @@
+import { randomUUID } from "node:crypto";
+import { ChatOpenAI } from "@langchain/openai";
+import { env } from "@ollive/env/server";
 import { evaluate } from "langsmith/evaluation";
 import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
-import { randomUUID } from "node:crypto";
 import { agent, openSourceAgent } from "../agent.js";
+import { EVAL_PROMPTS } from "./judge-prompts.js";
 
-const DATASETS = [
-  "ollive_bias_and_fairness",
-  "ollive_content_safety_jailbreak",
-  "ollive_factual_hallucination",
-] as const;
+const judge = new ChatOpenAI({
+  model: "gpt-5.4-mini",
+  ...(env.OPENAI_PROXY_URL
+    ? { configuration: { baseURL: env.OPENAI_PROXY_URL } }
+    : {}),
+});
 
-function isConcise(rootRun: Run, example?: Example): EvaluationResult {
-  const score =
-    rootRun.outputs?.answer?.length > example?.outputs?.referenceOutput?.length;
-  return { key: "is_concise", score };
+function createJudgeEvaluator(
+  promptTemplate: string,
+) {
+  return async (run: Run, example?: Example): Promise<EvaluationResult[]> => {
+    const prompt = promptTemplate
+      .replaceAll("{{inputs}}", JSON.stringify(run.inputs ?? {}))
+      .replaceAll("{{outputs}}", JSON.stringify(run.outputs ?? {}))
+      .replaceAll(
+        "{{reference_outputs}}",
+        JSON.stringify(example?.outputs ?? {}),
+      );
+
+    const response = await judge.invoke(prompt);
+    const parsed = JSON.parse(String(response.content ?? "{}")) as {
+      score_0_to_10?: number;
+      verdict?: boolean;
+      reasoning?: string;
+    };
+
+    const score = Math.max(0, Math.min(10, Number(parsed.score_0_to_10 ?? 0)));
+    const reasoning = parsed.reasoning ?? "";
+
+    return [{ key: "score", score, comment: reasoning }];
+  };
 }
 
-async function runFrontier(exampleInput: { input: string }): Promise<{ answer: string }> {
+const runFrontier = async (exampleInput: {
+  input: string;
+}): Promise<{ answer: string }> => {
   const result = await agent.invoke(
-    {
-      messages: [{ role: "user", content: exampleInput.input }],
-    },
+    { messages: [{ role: "user", content: exampleInput.input }] },
     { configurable: { thread_id: randomUUID() } },
   );
-  return { answer: String(result.messages[result.messages.length - 1]?.content ?? "") };
-}
+  return {
+    answer: String(result.messages[result.messages.length - 1]?.content ?? ""),
+  };
+};
 
-async function runOpenSource(exampleInput: { input: string }): Promise<{ answer: string }> {
+const runOpenSource = async (exampleInput: {
+  input: string;
+}): Promise<{ answer: string }> => {
   const result = await openSourceAgent.invoke(
-    {
-      messages: [{ role: "user", content: exampleInput.input }],
-    },
+    { messages: [{ role: "user", content: exampleInput.input }] },
     { configurable: { thread_id: randomUUID() } },
   );
-  return { answer: String(result.messages[result.messages.length - 1]?.content ?? "") };
-}
+  return {
+    answer: String(result.messages[result.messages.length - 1]?.content ?? ""),
+  };
+};
 
-for (const datasetName of DATASETS) {
-  await evaluate(runFrontier, {
-    data: datasetName,
-    evaluators: [isConcise],
-    experimentPrefix: `${datasetName} frontier experiment`,
-  });
-  console.log(`Completed: ${datasetName} (frontier)`);
+await evaluate(runFrontier, {
+  data: "ollive_bias_and_fairness",
+  evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
+  experimentPrefix: "ollive_bias_and_fairness frontier experiment",
+});
 
-  await evaluate(runOpenSource, {
-    data: datasetName,
-    evaluators: [isConcise],
-    experimentPrefix: `${datasetName} open_source experiment`,
-  });
-  console.log(`Completed: ${datasetName} (open_source)`);
-}
+await evaluate(runOpenSource, {
+  data: "ollive_bias_and_fairness",
+  evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
+  experimentPrefix: "ollive_bias_and_fairness open_source experiment",
+});
+
+await evaluate(runFrontier, {
+  data: "ollive_content_safety_jailbreak",
+  evaluators: [
+    createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
+  ],
+  experimentPrefix: "ollive_content_safety_jailbreak frontier experiment",
+});
+
+await evaluate(runOpenSource, {
+  data: "ollive_content_safety_jailbreak",
+  evaluators: [
+    createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
+  ],
+  experimentPrefix: "ollive_content_safety_jailbreak open_source experiment",
+});
+
+await evaluate(runFrontier, {
+  data: "ollive_factual_hallucination",
+  evaluators: [
+    createJudgeEvaluator(EVAL_PROMPTS.hallucination),
+  ],
+  experimentPrefix: "ollive_factual_hallucination frontier experiment",
+});
+
+await evaluate(runOpenSource, {
+  data: "ollive_factual_hallucination",
+  evaluators: [
+    createJudgeEvaluator(EVAL_PROMPTS.hallucination),
+  ],
+  experimentPrefix: "ollive_factual_hallucination open_source experiment",
+});
