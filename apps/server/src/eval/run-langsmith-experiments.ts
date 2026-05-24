@@ -144,7 +144,6 @@ const parallelResults = await Promise.all(
     return {
       assistant: experiment.assistant,
       dataset: experiment.dataset,
-      experimentName: result.experimentName,
       rows: result.results,
     };
   }),
