@@ -6,6 +6,7 @@ import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
 import { z } from "zod";
 import { agent, openSourceAgent } from "../agent.js";
+import { exportLangSmithExperiments } from "./export-langsmith-experiments.js";
 import { EVAL_PROMPTS } from "./judge-prompts.js";
 
 const judge = new ChatOpenAI({
@@ -69,35 +70,66 @@ const runOpenSource = async (exampleInput: {
   };
 };
 
-await Promise.all([
-  evaluate(runFrontier, {
-    data: "ollive_bias_and_fairness",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
-    experimentPrefix: "ollive_bias_and_fairness frontier experiment",
+const experiments = [
+  {
+    assistant: "frontier",
+    dataset: "ollive_bias_and_fairness",
+    target: runFrontier,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.fairness),
+    prefix: "frontier_bias_and_fairness",
+  },
+  {
+    assistant: "open_source",
+    dataset: "ollive_bias_and_fairness",
+    target: runOpenSource,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.fairness),
+    prefix: "open_source_bias_and_fairness",
+  },
+  {
+    assistant: "frontier",
+    dataset: "ollive_content_safety_jailbreak",
+    target: runFrontier,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
+    prefix: "frontier_content_safety_jailbreak",
+  },
+  {
+    assistant: "open_source",
+    dataset: "ollive_content_safety_jailbreak",
+    target: runOpenSource,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
+    prefix: "open_source_content_safety_jailbreak",
+  },
+  {
+    assistant: "frontier",
+    dataset: "ollive_factual_hallucination",
+    target: runFrontier,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.hallucination),
+    prefix: "frontier_factual_hallucination",
+  },
+  {
+    assistant: "open_source",
+    dataset: "ollive_factual_hallucination",
+    target: runOpenSource,
+    evaluator: createJudgeEvaluator(EVAL_PROMPTS.hallucination),
+    prefix: "open_source_factual_hallucination",
+  },
+] as const;
+
+const results = await Promise.all(
+  experiments.map(async (experiment) => {
+    const result = await evaluate(experiment.target, {
+      data: experiment.dataset,
+      evaluators: [experiment.evaluator],
+      experimentPrefix: experiment.prefix,
+    });
+
+    return {
+      assistant: experiment.assistant,
+      dataset: experiment.dataset,
+      experimentName: result.experimentName,
+      rows: result.results,
+    };
   }),
-  evaluate(runOpenSource, {
-    data: "ollive_bias_and_fairness",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.fairness)],
-    experimentPrefix: "ollive_bias_and_fairness open_source experiment",
-  }),
-  evaluate(runFrontier, {
-    data: "ollive_content_safety_jailbreak",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.promptInjection)],
-    experimentPrefix: "ollive_content_safety_jailbreak frontier experiment",
-  }),
-  evaluate(runOpenSource, {
-    data: "ollive_content_safety_jailbreak",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.promptInjection)],
-    experimentPrefix: "ollive_content_safety_jailbreak open_source experiment",
-  }),
-  evaluate(runFrontier, {
-    data: "ollive_factual_hallucination",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.hallucination)],
-    experimentPrefix: "ollive_factual_hallucination frontier experiment",
-  }),
-  evaluate(runOpenSource, {
-    data: "ollive_factual_hallucination",
-    evaluators: [createJudgeEvaluator(EVAL_PROMPTS.hallucination)],
-    experimentPrefix: "ollive_factual_hallucination open_source experiment",
-  }),
-]);
+);
+
+await exportLangSmithExperiments(results);

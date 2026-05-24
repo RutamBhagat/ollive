@@ -15,7 +15,7 @@ Both assistants use the same:
 
 The OSS assistant is configured to use exactly one model:
 
-- `qwen3.5:9b`
+- `qwen2.5:0.5b-instruct`
 
 Start Ollama:
 
@@ -26,7 +26,7 @@ ollama serve
 Pull the model if needed:
 
 ```bash
-ollama pull qwen3.5:9b
+ollama pull qwen2.5:0.5b-instruct
 ```
 
 Keep `OLLAMA_PROXY_URL` configured in `apps/server/.env` (see `apps/server/.env.example`):

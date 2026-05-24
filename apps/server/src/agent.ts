@@ -23,7 +23,7 @@ export const agent = createAgent({
 
 export const openSourceAgent = createAgent({
   model: new ChatOllama({
-    model: "qwen3.5:9b",
+    model: "qwen2.5:0.5b-instruct",
     ...(env.OLLAMA_PROXY_URL ? { baseUrl: env.OLLAMA_PROXY_URL } : {}),
   }),
   tools: TOOLS,

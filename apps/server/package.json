@@ -15,11 +15,12 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@ollive/env": "workspace:*",
     "@langchain/core": "^1.1.8",
     "@langchain/langgraph": "^1.3.2",
     "@langchain/ollama": "^1.0.0",
     "@langchain/openai": "^1.0.0",
+    "@ollive/env": "workspace:*",
+    "csv-stringify": "^6.7.0",
     "langchain": "^1.2.3",
     "langsmith": "^0.3.74",
     "nerdamer-prime": "^1.4.0",
