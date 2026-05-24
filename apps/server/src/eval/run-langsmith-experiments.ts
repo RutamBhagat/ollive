@@ -118,19 +118,38 @@ const experiments = [
 
 const results = [];
 
-for (const experiment of experiments) {
-  const result = await evaluate(experiment.target, {
-    data: experiment.dataset,
-    evaluators: [experiment.evaluator],
-    experimentPrefix: experiment.prefix,
-  });
+// for (const experiment of experiments) {
+//   const result = await evaluate(experiment.target, {
+//     data: experiment.dataset,
+//     evaluators: [experiment.evaluator],
+//     experimentPrefix: experiment.prefix,
+//   });
 
-  results.push({
-    assistant: experiment.assistant,
-    dataset: experiment.dataset,
-    experimentName: result.experimentName,
-    rows: result.results,
-  });
-}
+//   results.push({
+//     assistant: experiment.assistant,
+//     dataset: experiment.dataset,
+//     experimentName: result.experimentName,
+//     rows: result.results,
+//   });
+// }
+
+const parallelResults = await Promise.all(
+  experiments.map(async (experiment) => {
+    const result = await evaluate(experiment.target, {
+      data: experiment.dataset,
+      evaluators: [experiment.evaluator],
+      experimentPrefix: experiment.prefix,
+    });
+
+    return {
+      assistant: experiment.assistant,
+      dataset: experiment.dataset,
+      experimentName: result.experimentName,
+      rows: result.results,
+    };
+  }),
+);
+
+results.push(...parallelResults);
 
 await exportLangSmithExperiments(results);
