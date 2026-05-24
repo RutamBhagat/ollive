@@ -115,21 +115,21 @@ const experiments = [
   },
 ] as const;
 
-const results = await Promise.all(
-  experiments.map(async (experiment) => {
-    const result = await evaluate(experiment.target, {
-      data: experiment.dataset,
-      evaluators: [experiment.evaluator],
-      experimentPrefix: experiment.prefix,
-    });
+const results = [];
 
-    return {
-      assistant: experiment.assistant,
-      dataset: experiment.dataset,
-      experimentName: result.experimentName,
-      rows: result.results,
-    };
-  }),
-);
+for (const experiment of experiments) {
+  const result = await evaluate(experiment.target, {
+    data: experiment.dataset,
+    evaluators: [experiment.evaluator],
+    experimentPrefix: experiment.prefix,
+  });
+
+  results.push({
+    assistant: experiment.assistant,
+    dataset: experiment.dataset,
+    experimentName: result.experimentName,
+    rows: result.results,
+  });
+}
 
 await exportLangSmithExperiments(results);
