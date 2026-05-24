@@ -6,7 +6,6 @@ import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
 import { z } from "zod";
 import { agent, openSourceAgent, TIMEOUT_MS } from "../agent.js";
-import { exportLangSmithExperiments } from "./export-langsmith-experiments.js";
 import { EVAL_PROMPTS } from "./judge-prompts.js";
 
 const judge = new ChatOpenAI({
@@ -116,24 +115,17 @@ const experiments = [
   },
 ] as const;
 
-const results = [];
-
+//// Sequential
 // for (const experiment of experiments) {
-//   const result = await evaluate(experiment.target, {
+//   await evaluate(experiment.target, {
 //     data: experiment.dataset,
 //     evaluators: [experiment.evaluator],
 //     experimentPrefix: experiment.prefix,
 //   });
-
-//   results.push({
-//     assistant: experiment.assistant,
-//     dataset: experiment.dataset,
-//     experimentName: result.experimentName,
-//     rows: result.results,
-//   });
 // }
 
-const parallelResults = await Promise.all(
+//// Parallel
+await Promise.all(
   experiments.map(async (experiment) => {
     const result = await evaluate(experiment.target, {
       data: experiment.dataset,
@@ -149,7 +141,3 @@ const parallelResults = await Promise.all(
     };
   }),
 );
-
-results.push(...parallelResults);
-
-await exportLangSmithExperiments(results);
