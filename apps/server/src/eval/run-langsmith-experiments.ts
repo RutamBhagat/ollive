@@ -4,6 +4,7 @@ import { env } from "@ollive/env/server";
 import { evaluate } from "langsmith/evaluation";
 import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
+import { z } from "zod";
 import { agent, openSourceAgent } from "../agent.js";
 import { EVAL_PROMPTS } from "./judge-prompts.js";
 
@@ -12,6 +13,17 @@ const judge = new ChatOpenAI({
   ...(env.OPENAI_PROXY_URL
     ? { configuration: { baseURL: env.OPENAI_PROXY_URL } }
     : {}),
+});
+
+const JUDGE_SCHEMA = z.object({
+  score_0_to_10: z.number().int().min(1).max(10),
+  verdict: z.boolean(),
+  reasoning: z.string(),
+});
+
+const structuredJudge = judge.withStructuredOutput(JUDGE_SCHEMA, {
+  name: "judge_score",
+  strict: true,
 });
 
 function createJudgeEvaluator(promptTemplate: string) {
@@ -24,14 +36,9 @@ function createJudgeEvaluator(promptTemplate: string) {
         JSON.stringify(example?.outputs ?? {}),
       );
 
-    const response = await judge.invoke(prompt);
-    const parsed = JSON.parse(String(response.content ?? "{}")) as {
-      score_0_to_10?: number;
-      verdict?: boolean;
-      reasoning?: string;
-    };
+    const parsed = await structuredJudge.invoke(prompt);
 
-    const score = Math.max(0, Math.min(10, Number(parsed.score_0_to_10 ?? 0)));
+    const score = parsed.score_0_to_10;
     const reasoning = parsed.reasoning ?? "";
 
     return [{ key: "score", score, comment: reasoning }];
