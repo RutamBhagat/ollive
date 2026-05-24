@@ -5,12 +5,13 @@ import { evaluate } from "langsmith/evaluation";
 import type { EvaluationResult } from "langsmith/evaluation";
 import type { Example, Run } from "langsmith/schemas";
 import { z } from "zod";
-import { agent, openSourceAgent } from "../agent.js";
+import { agent, openSourceAgent, TIMEOUT_MS } from "../agent.js";
 import { exportLangSmithExperiments } from "./export-langsmith-experiments.js";
 import { EVAL_PROMPTS } from "./judge-prompts.js";
 
 const judge = new ChatOpenAI({
   model: "gpt-5.4-mini",
+  timeout: TIMEOUT_MS,
   ...(env.OPENAI_PROXY_URL
     ? { configuration: { baseURL: env.OPENAI_PROXY_URL } }
     : {}),
