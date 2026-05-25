@@ -6,7 +6,7 @@ import { env } from "@ollive/env/server";
 import { TOOLS } from "./tools.js";
 import { SYSTEM_PROMPT } from "./prompts.js";
 
-export const TIMEOUT_MS = 60_000;
+export const TIMEOUT_MS = 180_000;
 
 const frontierMemory = new MemorySaver();
 const openSourceMemory = new MemorySaver();
