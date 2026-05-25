@@ -70,74 +70,40 @@ const runOpenSource = async (exampleInput: {
   };
 };
 
-const experiments = [
+const experimentGroups = [
   {
-    assistant: "frontier",
     dataset: "ollive_bias_and_fairness",
-    target: runFrontier,
     evaluator: createJudgeEvaluator(EVAL_PROMPTS.fairness),
-    prefix: "frontier_bias_and_fairness",
+    frontierPrefix: "frontier_bias_and_fairness",
+    openSourcePrefix: "open_source_bias_and_fairness",
   },
   {
-    assistant: "open_source",
-    dataset: "ollive_bias_and_fairness",
-    target: runOpenSource,
-    evaluator: createJudgeEvaluator(EVAL_PROMPTS.fairness),
-    prefix: "open_source_bias_and_fairness",
-  },
-  {
-    assistant: "frontier",
     dataset: "ollive_content_safety_jailbreak",
-    target: runFrontier,
     evaluator: createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
-    prefix: "frontier_content_safety_jailbreak",
+    frontierPrefix: "frontier_content_safety_jailbreak",
+    openSourcePrefix: "open_source_content_safety_jailbreak",
   },
   {
-    assistant: "open_source",
-    dataset: "ollive_content_safety_jailbreak",
-    target: runOpenSource,
-    evaluator: createJudgeEvaluator(EVAL_PROMPTS.promptInjection),
-    prefix: "open_source_content_safety_jailbreak",
-  },
-  {
-    assistant: "frontier",
     dataset: "ollive_factual_hallucination",
-    target: runFrontier,
     evaluator: createJudgeEvaluator(EVAL_PROMPTS.hallucination),
-    prefix: "frontier_factual_hallucination",
-  },
-  {
-    assistant: "open_source",
-    dataset: "ollive_factual_hallucination",
-    target: runOpenSource,
-    evaluator: createJudgeEvaluator(EVAL_PROMPTS.hallucination),
-    prefix: "open_source_factual_hallucination",
+    frontierPrefix: "frontier_factual_hallucination",
+    openSourcePrefix: "open_source_factual_hallucination",
   },
 ] as const;
 
-//// Sequential
-// for (const experiment of experiments) {
-//   await evaluate(experiment.target, {
-//     data: experiment.dataset,
-//     evaluators: [experiment.evaluator],
-//     experimentPrefix: experiment.prefix,
-//   });
-// }
-
-//// Parallel
-await Promise.all(
-  experiments.map(async (experiment) => {
-    const result = await evaluate(experiment.target, {
+for (const experiment of experimentGroups) {
+  await Promise.all([
+    evaluate(runFrontier, {
       data: experiment.dataset,
       evaluators: [experiment.evaluator],
-      experimentPrefix: experiment.prefix,
-    });
-
-    return {
-      assistant: experiment.assistant,
-      dataset: experiment.dataset,
-      experimentName: result.experimentName,
-      rows: result.results,
-    };
-  }),
-);
+      experimentPrefix: experiment.frontierPrefix,
+    }),
+    evaluate(runOpenSource, {
+      data: experiment.dataset,
+      evaluators: [experiment.evaluator],
+      experimentPrefix: experiment.openSourcePrefix,
+    }),
+  ]);
+  console.log(`Completed: ${experiment.dataset} (frontier + open_source)`);
+  await new Promise((resolve) => setTimeout(resolve, 60_000)); // gemini api rate limit for free tier
+}
