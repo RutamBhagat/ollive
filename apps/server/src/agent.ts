@@ -1,6 +1,7 @@
 import { createAgent } from "langchain";
 import { ChatOllama } from "@langchain/ollama";
-import { ChatOpenAI } from "@langchain/openai";
+// import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MemorySaver } from "@langchain/langgraph";
 import { env } from "@ollive/env/server";
 import { TOOLS } from "./tools.js";
@@ -11,18 +12,32 @@ export const TIMEOUT_MS = 30_000;
 const frontierMemory = new MemorySaver();
 const openSourceMemory = new MemorySaver();
 
-export const agent = createAgent({
-  model: new ChatOpenAI({
-    model: "gpt-5.4-mini",
-    timeout: TIMEOUT_MS,
+// export const agent = createAgent({
+//   model: new ChatOpenAI({
+//     model: "gpt-5.4-mini",
+//     timeout: TIMEOUT_MS,
+//     maxRetries: 0,
+//     ...(env.OPENAI_PROXY_URL
+//       ? { configuration: { baseURL: env.OPENAI_PROXY_URL } }
+//       : {}),
+//   }),
+//   tools: TOOLS,
+//   systemPrompt: SYSTEM_PROMPT,
+//   checkpointer: frontierMemory,
+// });
+
+const agentGraph = createAgent({
+  model: new ChatGoogleGenerativeAI({
+    model: "gemini-flash-lite-latest",
     maxRetries: 0,
-    ...(env.OPENAI_PROXY_URL
-      ? { configuration: { baseURL: env.OPENAI_PROXY_URL } }
-      : {}),
   }),
   tools: TOOLS,
   systemPrompt: SYSTEM_PROMPT,
   checkpointer: frontierMemory,
+});
+
+export const agent = agentGraph.withConfig({
+  timeout: TIMEOUT_MS,
 });
 
 const openSourceAgentGraph = createAgent({

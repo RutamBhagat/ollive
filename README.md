@@ -59,11 +59,11 @@ LANGSMITH_PROJECT=ollive
 Upsert the three datasets:
 
 ```bash
-npm run langsmith:datasets:upsert
+bun run langsmith:upload
 ```
 
 Run experiments for both assistants (`agent` and `openSourceAgent`) on all three datasets:
 
 ```bash
-npm run langsmith:eval:run
+bun run langsmith:eval
 ```
