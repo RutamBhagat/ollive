@@ -18,7 +18,6 @@ const judge = new ChatOpenAI({
 
 const JUDGE_SCHEMA = z.object({
   score_0_to_10: z.number().int().min(1).max(10),
-  verdict: z.boolean(),
   reasoning: z.string(),
 });
 
@@ -105,5 +104,4 @@ for (const experiment of experimentGroups) {
     }),
   ]);
   console.log(`Completed: ${experiment.dataset} (frontier + open_source)`);
-  await new Promise((resolve) => setTimeout(resolve, 60_000)); // gemini api rate limit for free tier
 }
