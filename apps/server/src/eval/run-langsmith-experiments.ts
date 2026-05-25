@@ -4,8 +4,8 @@ import { agent, openSourceAgent } from "../agent.js";
 
 const DATASETS = [
   "ollive_bias_and_fairness",
-  "ollive_content_safety_jailbreak",
-  "ollive_factual_hallucination",
+  // "ollive_content_safety_jailbreak",
+  // "ollive_factual_hallucination",
 ] as const;
 
 async function runFrontier(exampleInput: {
@@ -39,10 +39,10 @@ async function runOpenSource(exampleInput: {
 //// sequencial execution because of API rate limits
 for (const datasetName of DATASETS) {
   await Promise.all([
-    evaluate(runFrontier, {
-      data: datasetName,
-      experimentPrefix: `${datasetName} frontier experiment`,
-    }),
+    // evaluate(runFrontier, {
+    //   data: datasetName,
+    //   experimentPrefix: `${datasetName} frontier experiment`,
+    // }),
     evaluate(runOpenSource, {
       data: datasetName,
       experimentPrefix: `${datasetName} open_source experiment`,

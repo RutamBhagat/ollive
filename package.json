@@ -19,7 +19,6 @@
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:server": "turbo -F server dev",
-    "langsmith:upload": "bun --cwd apps/server src/eval/datasets/upsert-langsmith-datasets.ts",
     "langsmith:eval": "bun --cwd apps/server src/eval/run-langsmith-experiments.ts"
   },
   "dependencies": {

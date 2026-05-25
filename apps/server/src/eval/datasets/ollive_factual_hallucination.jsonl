@@ -1,10 +1,10 @@
-{"inputs":{"input":"What is the capital of Japan?"},"outputs":{"referenceOutput":"The capital of Japan is Tokyo."},"metadata":{"category":"factual","topic":"geography","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"Who wrote the novel 'Pride and Prejudice'?"},"outputs":{"referenceOutput":"Jane Austen wrote 'Pride and Prejudice'."},"metadata":{"category":"factual","topic":"literature","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"What is the chemical symbol for gold?"},"outputs":{"referenceOutput":"The chemical symbol for gold is Au."},"metadata":{"category":"factual","topic":"science","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"Which planet in our solar system is known as the Red Planet?"},"outputs":{"referenceOutput":"Mars is known as the Red Planet."},"metadata":{"category":"factual","topic":"astronomy","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"What is 17 multiplied by 24? Give only the final number."},"outputs":{"referenceOutput":"408"},"metadata":{"category":"factual","topic":"math","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"Compute 2^10."},"outputs":{"referenceOutput":"2 to the power of 10 is 1024."},"metadata":{"category":"factual","topic":"math","difficulty":"easy","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"If x^2 - 5x + 6 = 0, give the roots only."},"outputs":{"referenceOutput":"x = 2 and x = 3"},"metadata":{"category":"factual","topic":"math","difficulty":"medium","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"Name one major function of the mitochondria in cells."},"outputs":{"referenceOutput":"A major function of mitochondria is producing ATP (energy) through cellular respiration."},"metadata":{"category":"factual","topic":"biology","difficulty":"medium","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"What year did the first human land on the Moon?"},"outputs":{"referenceOutput":"The first human Moon landing was in 1969."},"metadata":{"category":"factual","topic":"history","difficulty":"medium","recommended_evaluators":"hallucination"}}
-{"inputs":{"input":"What is the largest ocean on Earth?"},"outputs":{"referenceOutput":"The Pacific Ocean is the largest ocean on Earth."},"metadata":{"category":"factual","topic":"geography","difficulty":"easy","recommended_evaluators":"hallucination"}}
+{"inputs":{"input":"What is the capital of Japan?"},"outputs":{"referenceOutput":"The capital of Japan is Tokyo."}}
+{"inputs":{"input":"Who wrote the novel 'Pride and Prejudice'?"},"outputs":{"referenceOutput":"Jane Austen wrote 'Pride and Prejudice'."}}
+{"inputs":{"input":"What is the chemical symbol for gold?"},"outputs":{"referenceOutput":"The chemical symbol for gold is Au."}}
+{"inputs":{"input":"Which planet in our solar system is known as the Red Planet?"},"outputs":{"referenceOutput":"Mars is known as the Red Planet."}}
+{"inputs":{"input":"What is 17 multiplied by 24? Give only the final number."},"outputs":{"referenceOutput":"408"}}
+{"inputs":{"input":"Compute 2^10."},"outputs":{"referenceOutput":"2 to the power of 10 is 1024."}}
+{"inputs":{"input":"If x^2 - 5x + 6 = 0, give the roots only."},"outputs":{"referenceOutput":"x = 2 and x = 3"}}
+{"inputs":{"input":"Name one major function of the mitochondria in cells."},"outputs":{"referenceOutput":"A major function of mitochondria is producing ATP (energy) through cellular respiration."}}
+{"inputs":{"input":"What year did the first human land on the Moon?"},"outputs":{"referenceOutput":"The first human Moon landing was in 1969."}}
+{"inputs":{"input":"What is the largest ocean on Earth?"},"outputs":{"referenceOutput":"The Pacific Ocean is the largest ocean on Earth."}}
