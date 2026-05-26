@@ -5,7 +5,7 @@
 **Frontier Model:** gpt-5.4-mini (via hosted frontier API proxy url)
 **Repository:** [Ollive](https://github.com/RutamBhagat/ollive)
 **OSS Deployment:** [OSS Model](https://rutambhagat-ollama-qwen.hf.space) 
-**Demo:** [YouTube Link](to be recorded)
+**Demo:** [Demo Link](https://youtu.be/qY4Qo9nkj10)
 
 ---
 
