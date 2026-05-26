@@ -20,16 +20,36 @@ Both assistants support multi-turn conversation, short-term memory, calculator t
 
 ```mermaid
 flowchart TD
-  studio[LangGraph Studio / user] --> graphs[LangGraph assistants]
+  user[User / LangGraph Studio]
 
-  subgraph shared[Shared assistant behavior]
-    prompt[system prompt]
-    tools[calculator + current time tools]
-    memory[short-term memory checkpointers]
+  subgraph assistants[Assistant runtime]
+    frontier[agent\nFrontier assistant]
+    oss[openSourceAgent\nOSS assistant]
   end
 
-  graphs --> frontier[agent]
-  graphs --> oss[openSourceAgent]
+  subgraph shared[Shared behavior]
+    prompt[System prompt]
+    tools[Tools\ncalculator + current time]
+    memory[Short-term memory\nLangGraph checkpointers]
+  end
+
+  subgraph models[Model endpoints]
+    openai[OpenAI-compatible API\ngpt-5.4-mini]
+    hf[Hugging Face Docker Space]
+    ollama[Ollama-compatible endpoint\nqwen2.5:0.5b-instruct]
+  end
+
+  subgraph evals[Evaluation and reporting]
+    datasets[LangSmith datasets\nfactuality + safety + fairness]
+    runner[Eval runner]
+    judge[LLM-as-judge]
+    exports[CSV exports + charts]
+    report[summary.pdf]
+  end
+
+  user --> frontier
+  user --> oss
+
   prompt --> frontier
   prompt --> oss
   tools --> frontier
@@ -37,22 +57,16 @@ flowchart TD
   memory --> frontier
   memory --> oss
 
-  frontier --> openai[OpenAI-compatible API]
-  oss --> ollama[Ollama-compatible endpoint]
-  hf[Hugging Face Docker Space] --> ollama
-
-  subgraph evals[Evaluation]
-    datasets[LangSmith datasets]
-    runner[eval runner]
-    judge[LLM judge]
-    exports[CSV exports + charts + report]
-  end
+  frontier --> openai
+  oss --> ollama
+  hf --> ollama
 
   datasets --> runner
   runner --> frontier
   runner --> oss
   runner --> judge
   runner --> exports
+  exports --> report
 ```
 
 Key decisions:
@@ -81,7 +95,7 @@ Summary results:
 | Content safety | 9.8 / 10 | 8.2 / 10 |
 | Bias and fairness | 9.8 / 10 | 3.7 / 10 |
 
-Cost, latency, charts, and recommendations are in [`summary.pdf`](summary.pdf). The source report markdown is in [`apps/server/src/eval/export/hf_spaces/summary.md`](apps/server/src/eval/export/hf_spaces/summary.md).
+Cost, latency, charts, and recommendations are in [`summary.pdf`](summary.pdf)
 
 ## Setup
 
