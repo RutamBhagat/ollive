@@ -1,28 +1,26 @@
-# AI Personal Assistant Evaluation Report
+# Evaluation Report
 
-**Submission:** Founding AI/ML Engineer Take-Home  
 **Assistants Compared:** Open-source assistant vs frontier model assistant  
-**OSS Model:** Qwen2.5-0.5B-Instruct via public Hugging Face Spaces / Ollama-compatible endpoint  
-**Frontier Model:** Hosted frontier API assistant  
-**Evaluation Date:** 2026-05-25  
-**Repository:** `[INSERT_GITHUB_REPO_URL]`  
-**OSS Deployment:** `[INSERT_HF_SPACE_OR_PUBLIC_ENDPOINT]`  
-**Demo:** `[INSERT_DEMO_LINK_OR_SCREENSHOTS_IF_AVAILABLE]`
+**OSS Model:** Qwen2.5-0.5B-Instruct (via public Hugging Face Spaces / Ollama-compatible endpoint) 
+**Frontier Model:** gpt-5-mini (via hosted frontier API proxy url)
+**Repository:** [Ollive](https://github.com/RutamBhagat/ollive)
+**OSS Deployment:** [OSS Model](https://rutambhagat-ollama-qwen.hf.space) 
+**Demo:** [YouTube Link](to be recorded)
 
 ---
 
-## 1. Evaluation Setup
+## 1. Evaluation
 
-The goal was to compare two personal assistants with the same user-facing capabilities:
+Compared two personal assistants with the same capabilities:
 
-- Multi-turn assistant behavior
-- Short-term conversation context
-- Basic personal-assistant style responses
-- Same evaluation prompt sets across both systems
+- Multi-turn assistantance
+- Short-term conversation
+- Same system and evaluation prompts
+- Same tools used
 
-The evaluation covered the three required dimensions from the assignment:
+Coveres three dimensions:
 
-| Evaluation Area | What It Tests | Prompt Count | Scoring |
+| Evaluation Area | It Tests | Prompts Count | Scoring |
 |---|---:|---:|---|
 | Factual accuracy / hallucination control | Whether the assistant answers factual prompts correctly without inventing details | 10 | 0-10 |
 | Content safety / jailbreak resistance | Whether the assistant refuses unsafe or adversarial harmful requests | 10 | 0-10 |
@@ -34,7 +32,7 @@ A score of **8/10 or higher** was treated as a passing response.
 
 ---
 
-## 2. Headline Results
+## 2. Results
 
 | Metric | Frontier API | OSS Qwen 0.5B | Winner |
 |---|---:|---:|---|
@@ -43,7 +41,7 @@ A score of **8/10 or higher** was treated as a passing response.
 | Bias and fairness | **9.8 / 10** | 3.7 / 10 | Frontier |
 
 **Summary:**  
-The frontier assistant was clearly stronger across all three required evaluation categories. The OSS assistant was usable for simple assistant workflows and performed reasonably on content-safety prompts, but it showed major weakness on factual reliability and especially bias/fairness.
+The frontier assistant was stronger across all three required evaluation categories. The OSS assistant was usable for simple assistant workflows and performed reasonably on content-safety prompts, but it showed major weakness on factual reliability and especially bias/fairness.
 
 ---
 
@@ -117,7 +115,9 @@ The frontier assistant scored **9.8/10**, while the OSS assistant scored **3.7/1
 | OSS Qwen 0.5B | 7.08s | 4.00s | 26.15s | $0.00 API token cost |
 
 **Note:**  
-The OSS assistant had no token API cost in the evaluation logs, but this does not mean it is free in production. Real deployment cost depends on the hosting platform, hardware, concurrency, cold starts, and uptime requirements.
+The OSS assistant had no token API cost in the evaluation logs, but this does not mean it is free in production. The public Hugging Face Spaces path used here runs on free CPU Basic-style infrastructure: **2 vCPU, 16 GB RAM, 50 GB non-persistent disk, no standard GPU, and sleep after inactivity**. That is useful for demos, but constrained for LLM inference.
+
+A local GPU comparison on my workstation — **Ryzen 7 9800X3D, RTX 5080 with 16 GB VRAM, 60 GB system RAM, NVIDIA driver 580 / CUDA 13** — served the same OSS model much faster, averaging roughly **0.22-0.34s** latency across the three eval categories. This means the OSS latency result is mainly a weak deployment/hardware constraint, not an inherent limit of open-source models.
 
 ---
 
@@ -140,14 +140,11 @@ The main architectural decision was to keep the assistant interface and evaluati
 * Best factual reliability
 * Strongest refusal behavior
 * Best bias/fairness performance
-* Lower average latency than the OSS deployment in this run
+* Lower average latency than the OSS deployment in this run (only against the Hugging Face Spaces CPU deployment, locally oss model was much faster because of better hardware)
 * More suitable for production assistant behavior
 
 **Weaknesses**
 
-* Paid API dependency
-* Less control over model internals
-* Vendor dependency
 * Usage cost scales with traffic
 
 ### OSS assistant
@@ -155,44 +152,35 @@ The main architectural decision was to keep the assistant interface and evaluati
 **Strengths**
 
 * Publicly deployable
-* No token API cost in the logged evaluation
-* Full control over model/runtime choices
-* Useful for prototyping, demos, and constrained assistant tasks
+* No token API cost in the logged evaluation (because of free hugging face space)
+* Useful for prototyping, demos
 
 **Weaknesses**
 
 * Weaker factual accuracy
 * Poor bias/fairness behavior in this evaluation
-* Higher average latency
-* More operational burden
+* Higher latency on the free public CPU deployment used for the main report
+* More deployment complexity when moving to stronger self-hosted hardware
 * Needs stronger guardrails before production use
+* High number of parallel model calls will overwhelm the hardware
 
 ---
 
 ## 9. Recommendation
 
-For a production-facing personal assistant, I would use the **frontier model assistant as the default** because it was materially stronger across factuality, safety, and fairness.
+For a production-facing personal assistant, I would use the **frontier model assistant as the default** because it was stronger across factuality, safety, and fairness.
 
 The OSS assistant is still valuable as a bonus deployment and experimentation path, but it should not be positioned as production-safe without additional work. The most important next steps for the OSS version are:
 
 1. Add a safety classifier or moderation layer before and after generation.
-2. Add retrieval or tool grounding for factual prompts.
-3. Improve refusal templates for sensitive and protected-class prompts.
-4. Add observability for latency, failures, refusal quality, and unsafe outputs.
-5. Re-run evals after guardrail changes and track regressions over time.
+2. Improve refusal templates for sensitive and protected-class prompts.
 
 ---
 
 ## 10. What I Would Improve With More Time
 
 * Expand the evaluation set from 30 prompts to 100-300 prompts.
-* Add public benchmarks such as TruthfulQA-style factual prompts, BBQ/StereoSet-style bias prompts, and jailbreak/safety prompt suites.
-* Add LLM-as-judge grading with rubric explanations.
-* Add human spot checks for borderline safety and bias examples.
-* Add per-category confusion analysis: correct refusal, over-refusal, unsafe compliance, factual error, hallucinated detail.
-* Add prompt/version tracking so evals are reproducible across model and system-prompt changes.
-* Add latency and cost monitoring by endpoint, prompt type, and response length.
-* Test larger OSS models such as Qwen2.5-1.5B/3B or Llama 3.2 variants to measure quality/cost tradeoffs.
+* Test larger OSS models such as qwen3.5:9b or gemma4:26b variants on Hugging face to measure quality/cost tradeoffs (I have tested them locally and they are much better than the current model but since the Hugging face free tier had resource limitations, I couldn't use them).
 
 ---
 
