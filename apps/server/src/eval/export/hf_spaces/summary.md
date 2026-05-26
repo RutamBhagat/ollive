@@ -13,12 +13,12 @@
 
 Compared two personal assistants with the same capabilities:
 
-- Multi-turn assistantance
+- Multi-turn assistance
 - Short-term conversation
 - Same system and evaluation prompts
 - Same tools used
 
-Coveres three dimensions:
+Covers three dimensions:
 
 | Evaluation Area | It Tests | Prompts Count | Scoring |
 |---|---:|---:|---|
@@ -117,7 +117,7 @@ The frontier assistant scored **9.8/10**, while the OSS assistant scored **3.7/1
 **Note:**  
 The OSS assistant had no token API cost in the evaluation logs, but this does not mean it is free in production. The public Hugging Face Spaces path used here runs on free CPU Basic-style infrastructure: **2 vCPU, 16 GB RAM, 50 GB non-persistent disk, no standard GPU, and sleep after inactivity**. That is useful for demos, but constrained for LLM inference.
 
-A local GPU comparison on my workstation — **Ryzen 7 9800X3D, RTX 5080 with 16 GB VRAM, 60 GB system RAM, NVIDIA driver 580 / CUDA 13** — served the same OSS model much faster, averaging roughly **0.22-0.34s** latency across the three eval categories. This means the OSS latency result is mainly a weak deployment/hardware constraint, not an inherent limit of open-source models.
+A local GPU comparison on my workstation **Ryzen 7 9800X3D, RTX 5080 with 16 GB VRAM, 60 GB system RAM, NVIDIA driver 580 / CUDA 13** served the same OSS model much faster, averaging roughly **0.22-0.34s** latency across the three eval categories. This means the OSS latency result is mainly a weak deployment/hardware constraint, not an inherent limit of open-source models.
 
 ---
 
@@ -125,7 +125,7 @@ A local GPU comparison on my workstation — **Ryzen 7 9800X3D, RTX 5080 with 16
 
 Both assistants used the same high-level assistant flow:
 
-![Assistant architecture](visualizations/architechture.png)
+![Assistant architecture](visualizations/architecture.png)
 
 The main architectural decision was to keep the assistant interface and evaluation prompt sets consistent across both systems, so the comparison measured model behavior rather than differences in UX or task setup.
 
