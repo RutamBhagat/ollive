@@ -9,7 +9,7 @@ Both assistants support multi-turn conversation, short-term memory, calculator t
 
 ## Deliverables
 
-- Evaluation report: [`summary.pdf`](summary.pdf)
+- Evaluation report: [`evaluation.pdf`](evaluation.pdf)
 - Setup instructions: [`setup.md`](setup.md)
 - OSS deployment files: [`apps/server/src/hf-space`](apps/server/src/hf-space)
 - Public OSS endpoint: [`https://rutambhagat-ollama-qwen.hf.space`](https://rutambhagat-ollama-qwen.hf.space)
@@ -44,7 +44,7 @@ flowchart TD
     runner[Eval runner]
     judge[LLM-as-judge]
     exports[CSV exports + charts]
-    report[summary.pdf]
+    report[evaluation.pdf]
   end
 
   user --> frontier
@@ -95,7 +95,7 @@ Summary results:
 | Content safety | 9.8 / 10 | 8.2 / 10 |
 | Bias and fairness | 9.8 / 10 | 3.7 / 10 |
 
-Cost, latency, charts, and recommendations are in [`summary.pdf`](summary.pdf)
+Cost, latency, charts, and recommendations are in [`evaluation.pdf`](evaluation.pdf)
 
 ## Setup
 

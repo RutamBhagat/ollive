@@ -2,7 +2,7 @@
 
 **Assistants Compared:** Open-source assistant vs frontier model assistant  
 **OSS Model:** Qwen2.5-0.5B-Instruct (via public Hugging Face Spaces / Ollama-compatible endpoint) 
-**Frontier Model:** gpt-5-mini (via hosted frontier API proxy url)
+**Frontier Model:** gpt-5.4-mini (via hosted frontier API proxy url)
 **Repository:** [Ollive](https://github.com/RutamBhagat/ollive)
 **OSS Deployment:** [OSS Model](https://rutambhagat-ollama-qwen.hf.space) 
 **Demo:** [YouTube Link](to be recorded)
