@@ -1,112 +1,126 @@
-# Ollive Assignment
+# Ollive AI Assistant
 
-This repository contains two LangGraph assistants exposed in LangGraph Studio:
+This repo is a LangGraph assistant used to compare a frontier model assistant against an open-source model assistant.
 
-- `agent`: hosted frontier model assistant (`ChatOpenAI`)
-- `openSourceAgent`: open-source assistant via Ollama (`ChatOllama`)
+The implementation includes:
 
-Both assistants use the same:
+- a multi-turn assistant with short-term conversation memory
+- shared tools for calculation and current time/date lookup
+- a frontier assistant using `gpt-5.4-mini`
+- an OSS assistant using `qwen2.5:0.5b-instruct`
+- LangSmith-based evaluation for factuality, safety, and fairness
+- a Docker-based Hugging Face Space for hosting the OSS model endpoint
 
-- system prompt
-- tools
-- short-term memory (LangGraph `MemorySaver`)
+## Demo and report
 
-## OSS model setup
+- Full report: [`summary.pdf`](summary.pdf)
+- Setup instructions: [`setup.md`](setup.md)
+- OSS HF Space files: [`apps/server/src/hf-space`](apps/server/src/hf-space)
+- HF repo: [Ollama Qwen](https://huggingface.co/spaces/RutamBhagat/ollama-qwen/tree/main)
 
-The OSS assistant is configured to use exactly one model:
+## Architecture
 
-- `qwen2.5:0.5b-instruct`
+```mermaid
+flowchart TD
+  studio[LangGraph Studio / user] --> graphs[LangGraph assistants]
 
-Start Ollama:
+  subgraph shared[Shared assistant behavior]
+    prompt[system prompt]
+    tools[tools: calculator, current time]
+    memory[short-term memory checkpointers]
+  end
 
-```bash
-ollama serve
+  graphs --> frontier[frontier agent]
+  graphs --> oss[openSourceAgent]
+  prompt --> frontier
+  prompt --> oss
+  tools --> frontier
+  tools --> oss
+  memory --> frontier
+  memory --> oss
+
+  frontier --> openai[OpenAI-compatible API\ngpt-5.4-mini]
+  oss --> ollama[Ollama-compatible endpoint\nqwen2.5:0.5b-instruct]
+  hf[Hugging Face Docker Space] --> ollama
+
+  subgraph evals[Evaluation pipeline]
+    datasets[LangSmith datasets\nfactuality, safety, fairness]
+    runner[eval runner]
+    judge[judge model\ngpt-5.4-mini structured scoring]
+    exports[CSV exports, charts, summary report]
+  end
+
+  datasets --> runner
+  runner --> frontier
+  runner --> oss
+  runner --> judge
+  frontier --> traces[LangSmith traces and run metadata]
+  oss --> traces
+  judge --> traces
+  traces --> exports
 ```
 
-Pull the model if needed:
+Both assistants use the same system prompt, tools, and evaluation datasets so the comparison focuses on model behavior rather than application differences.
+
+## Evaluation
+
+The assistants were evaluated on three categories:
+
+| Area | Prompts | What it checks |
+|---|---:|---|
+| Factual accuracy / hallucination | 10 | factual grounding and unsupported claims |
+| Content safety / jailbreak resistance | 10 | refusal behavior and prompt-injection resistance |
+| Bias and fairness | 10 | protected-class and stereotype handling |
+
+A score of `8/10` or higher was treated as passing.
+
+Summary results:
+
+| Metric | Frontier API | OSS Qwen 0.5B |
+|---|---:|---:|
+| Factual accuracy | 10.0 / 10 | 6.1 / 10 |
+| Content safety | 9.8 / 10 | 8.2 / 10 |
+| Bias and fairness | 9.8 / 10 | 3.7 / 10 |
+
+See [`summary.pdf`](summary.pdf) for the full results and charts.
+
+## Setup
+
+Use [`setup.md`](setup.md) for the exact setup and run commands.
+
+Short version:
 
 ```bash
-ollama pull qwen2.5:0.5b-instruct
+bun install
+cp apps/server/.env.example apps/server/.env
+bun run dev
 ```
 
-Keep `OLLAMA_PROXY_URL` configured in `apps/server/.env` (see `apps/server/.env.example`):
+Then open the LangGraph Studio URL printed by the dev server.
 
-```bash
-OLLAMA_PROXY_URL=http://localhost:11434
-```
+## Logging and storage
 
-## Run LangGraph Studio
+This project uses LangSmith for trace capture, model run metadata, evaluation records, and exported analysis.
 
-```bash
-bun run dev:server
-```
+Stored/evaluated data includes:
 
-Then open LangGraph Studio and select:
+- assistant inputs and outputs
+- model latency
+- run status and errors
+- evaluation scores
+- judge reasoning
+- exported CSV summaries and visualizations
 
-- `agent`
-- `openSourceAgent`
+## Tradeoffs
 
-## LangSmith eval setup (happy path)
+- The frontier model is the safer default based on the evaluation results.
+- The OSS model is cheaper to expose for demos, but quality is weaker on factuality and fairness.
+- The hosted OSS endpoint uses free Hugging Face CPU hardware, so latency is mostly a deployment constraint.
+- Evaluations are run sequentially to avoid overloading the HF Space.
+- Langchain and Langgraph is used for a simple framework for developing AI agents.
+- LangSmith is used instead of building a custom ingestion/database layer to keep the project small and focused.
 
-Set these in `apps/server/.env`:
+## What I would improve with more time
 
-```bash
-LANGSMITH_API_KEY=your-langsmith-api-key
-LANGSMITH_TRACING=true
-LANGSMITH_PROJECT=ollive
-```
-
-Create the three datasets manually in the LangSmith dashboard using the JSONL files in `apps/server/src/eval/datasets/`:
-
-- `ollive_bias_and_fairness`
-- `ollive_content_safety_jailbreak`
-- `ollive_factual_hallucination`
-
-Run experiments for both assistants (`agent` and `openSourceAgent`) on all three datasets:
-
-```bash
-bun run langsmith:eval
-```
-
-## OSS Model Deployment
-
-The open-source assistant is deployed publicly on Hugging Face Spaces using Ollama.
-
-- Platform: Hugging Face Spaces Docker
-- Model: qwen2.5:0.5b-instruct
-- Endpoint: https://rutambhagat-ollama-qwen.hf.space
-- API: Ollama-compatible `/api/chat`
-- Hardware: CPU Basic
-- Quantization: Q4_K_M
-- Model size: ~398 MB
-
-Example request:
-
-```bash
-curl "https://rutambhagat-ollama-qwen.hf.space/api/chat" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "qwen2.5:0.5b-instruct",
-    "messages": [{"role":"user","content":"hi"}],
-    "stream": false
-  }'
-
-
-
-## Add this to your cost + latency table
-
-From your test:
-
-| Deployment | Model | Platform | Cost | Total latency | Load time | Output tokens | Approx generation speed |
-|---|---|---|---:|---:|---:|---:|---:|
-| OSS assistant | Qwen2.5-0.5B-Instruct | HF Spaces CPU Basic | Free | 7.93s | 2.25s | 24 | ~5.6 tok/s |
-
-
-## Remaining work for the full submission
-
-You are **done with the HF deployment**, but not the full assignment unless these are complete:
-
-1. Wire your app’s OSS assistant to:
-
-```bash
-OLLAMA_PROXY_URL=https://rutambhagat-ollama-qwen.hf.space
+- Expand the eval set from 30 prompts to 100-300 prompts.
+- Test larger OSS models on stronger hosted hardware.
