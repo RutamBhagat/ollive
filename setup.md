@@ -1,57 +1,130 @@
-# Prerequisites
-- bun
-- git
+# Setup
+
+## Prerequisites
+
+- Bun 1.3+
+- Git
+- OpenAI-compatible API key for the frontier assistant and judge model
+- LangSmith API key from `https://smith.langchain.com/o/<your-org-id>/settings/apikeys`
+- Ollama only if you want to run the OSS model locally instead of the hosted HF Space
 
 ```bash
 git clone git@github.com:RutamBhagat/ollive.git
 cd ollive
-bun i
-```
-
-```bash
+bun install
 cp apps/server/.env.example apps/server/.env
 ```
-- create your langsmith project and get the api key
-- update your env vars for openai api key, langsmith api key and ollama url if needed
-- you can get langsmith api key from https://smith.langchain.com/o/<your-org-id>/settings/apikeys
-- if you want to run ollama locally
+
+## Environment
+
+Update `apps/server/.env`:
+
 ```bash
-# install ollama
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull qwen2.5:0.5b-instruct 
+OPENAI_API_KEY=...
+OPENAI_PROXY_URL=
+OLLAMA_PROXY_URL=https://rutambhagat-ollama-qwen.hf.space
+LANGSMITH_API_KEY=...
+LANGSMITH_PROJECT=ollive
+LANGSMITH_TRACING=true
+```
+
+`OPENAI_PROXY_URL` is optional. Use it only for an OpenAI-compatible proxy.
+
+The default OSS endpoint is the public Hugging Face Space. For local Ollama instead:
+
+```bash
+ollama serve
+ollama pull qwen2.5:0.5b-instruct
+```
+
+Then set:
+
+```bash
+OLLAMA_PROXY_URL=http://localhost:11434
+```
+
+## Run the assistants
+
+```bash
 bun run dev
 ```
 
-# Langchain studio should open automatically in the browser
-```
-https://smith.langchain.com/studio/thread?baseUrl=http%3A%2F%2Flocalhost%3A2024&organizationId=<your-org-id>&mode=chat&render=interact&assistantId=<assistant-id>
-```
+LangGraph Studio should open automatically. If not, open the Studio URL printed in the terminal.
+
+Available graphs:
+
+- `agent` - frontier assistant using `gpt-5.4-mini`
+- `openSourceAgent` - OSS assistant using `qwen2.5:0.5b-instruct`
+
+Both assistants use the same system prompt, calculator tool, current-time tool, and short-term memory.
+
+Useful manual checks:
+
 - turn on `show tool calls`
-- you can switch between agent (frontier) and openSourceAgent from top graph selector
-- Ask some complex math related question to test calculator tool call or test questions related to bias, fairness, content safety, jailbreak or factual hallucination from `apps/server/src/eval/datasets`
-- you can go through previous csv exports from langsmith in `apps/server/src/eval/export`
+- ask a math question to verify the calculator tool
+- ask for the current date/time to verify the time tool
+- test memory with two messages such as `My name is ...` then `What is my name?`
+- try prompts from `apps/server/src/eval/datasets`
 
-# HF Space (if you want to create your own oss model deployment)
-- `apps/server/src/hf-space` contains the files required for hosting the ollama model on huggingface
-- create a new hf-space app
-- go to `https://huggingface.co/spaces` login with your hf account
-- select `New Space` and give it a name
-- select `Docker` as the hardware
-- select cpu basic as the space hardware
-- create space
-- upload the files from `apps/server/src/hf-space` to the space
-- wait for it to build and deploy
-- you can access your deployed model at `https://huggingface.co/spaces/<your-username>/<your-space-name>`
-- add it to your .env file
+## Run evaluations
 
-# Upload dataset
-- go to `https://smith.langchain.com/o/<your-org-id>/datasets` and create new and upload the datasets files from `apps/server/src/eval/datasets`
-- you dont need to create evaluators they are already created in `apps/server/src/eval/run-langsmith-experiments.ts` and `apps/server/src/eval/judge-prompts.ts`
-- the experiments will be created once you run
+Manually upload the JSONL files from `apps/server/src/eval/datasets` to LangSmith.
+
+Go to:
+
+```text
+https://smith.langchain.com/o/<your-org-id>/datasets
+```
+
+Create these datasets with the exact names:
+
+- `ollive_bias_and_fairness`
+- `ollive_content_safety_jailbreak`
+- `ollive_factual_hallucination`
+
+Then run:
+
 ```bash
 bun run langsmith:eval
 ```
-- it will take a while to finish evaluation
-- this is intentially in series instead of parallel to avoid resource exhaustion of the huggingface space
-- you can open the links to the experiments from the terminal or go to `https://smith.langchain.com/o/<your-org-id>/datasets`
-- hf space has cold starts on free plan so the initial cold start first prompt might take longer than subsequent prompts
+
+The evaluators are already defined in code, so you do not need to create evaluators in LangSmith manually. The eval runner is `apps/server/src/eval/run-langsmith-experiments.ts` and the judge prompts are in `apps/server/src/eval/judge-prompts.ts`.
+
+The OSS endpoint can cold start on the HF free tier, so the first request may be slow. The eval runs are intentionally kept sequential because parallel model calls can exhaust the Hugging Face Space resources.
+
+## Results
+
+- CSV exports and charts: `apps/server/src/eval/export/hf_spaces`
+- Local GPU comparison exports: `apps/server/src/eval/export/local_gpu`
+
+## HF Space deployment
+
+`apps/server/src/hf-space` contains the Docker Space files required for deploying the Ollama-compatible OSS endpoint.
+
+To create your own Space:
+
+1. Go to `https://huggingface.co/spaces` and sign in.
+2. Select **New Space**.
+3. Give it a name.
+4. Select **Docker** as the Space SDK.
+5. Use **CPU Basic** hardware for the same setup.
+6. Create the Space.
+7. Upload the files from `apps/server/src/hf-space`.
+8. Wait for the Docker build and model pull to finish.
+9. Open the deployed Space URL:
+
+```text
+https://<username>-<space-name>.hf.space
+```
+
+Set the app to use that endpoint:
+
+```bash
+OLLAMA_PROXY_URL=https://<username>-<space-name>.hf.space
+```
+
+Public endpoint used for this submission:
+
+```text
+https://rutambhagat-ollama-qwen.hf.space
+```
