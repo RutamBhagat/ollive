@@ -56,11 +56,11 @@ LANGSMITH_TRACING=true
 LANGSMITH_PROJECT=ollive
 ```
 
-Upsert the three datasets:
+Create the three datasets manually in the LangSmith dashboard using the JSONL files in `apps/server/src/eval/datasets/`:
 
-```bash
-bun run langsmith:upload
-```
+- `ollive_bias_and_fairness`
+- `ollive_content_safety_jailbreak`
+- `ollive_factual_hallucination`
 
 Run experiments for both assistants (`agent` and `openSourceAgent`) on all three datasets:
 
@@ -101,7 +101,6 @@ From your test:
 |---|---|---|---:|---:|---:|---:|---:|
 | OSS assistant | Qwen2.5-0.5B-Instruct | HF Spaces CPU Basic | Free | 7.93s | 2.25s | 24 | ~5.6 tok/s |
 
-This is one measured sample, not an average. For the final report, run it 3–5 times and report average warm latency.
 
 ## Remaining work for the full submission
 
